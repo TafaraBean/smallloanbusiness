@@ -220,21 +220,14 @@ quit;
 ods graphics / width=860px height=480px;
 title "Default Rate by Loan Term (months)";
 proc sgplot data=work.default_rate_by_term;
-  series x=term_n y=default_rate / markers;
+  *series x=term_n y=default_rate / markers;
   loess  x=term_n y=default_rate / nomarkers smooth=0.3;  /* gentle smoother */
   yaxis label="Default Rate" valuesformat=percent8.1;
   xaxis label="Loan Term (months)" grid;
 run; title;
 
-/* ---------- 2a) Distribution of DEFAULTED loans by term (histogram) ---------- */
-title "Distribution of Loan Terms Among Defaulted Loans";
-proc sgplot data=work.loans_term;
-  where default_n=1;
-  histogram term_n / binwidth=12 scale=count;  /* 12-month bins */
-  density   term_n;
-  xaxis label="Loan Term (months)" min=0;
-  yaxis label="Number of Defaults";
-run; title;
+
+
 
 /* ---------- 2b) Default RATE by 12-month bins (clean bars) ---------- */
 data work.loans_term_bins;
@@ -265,6 +258,194 @@ proc sgplot data=work.default_rate_by_bin;
   yaxis label="Default Rate" valuesformat=percent8.1;
   xaxis label="Loan Term (months, 12-month bins)";
 run; title;
+
+
+
+/* Make sure the three vars are numeric (handles character columns too) */
+data work.jobs_bubble;
+  set work.loans_prep;                    /* or work.loans_raw */
+  if vtype(NoEmp)='C'        then noemp_n        = input(compress(NoEmp,,'kd'), best32.);
+  else                             noemp_n        = NoEmp;
+
+  if vtype(CreateJob)='C'    then createjob_n    = input(compress(CreateJob,,'kd'), best32.);
+  else                             createjob_n    = CreateJob;
+
+  if vtype(RetainedJob)='C'  then retainedjob_n  = input(compress(RetainedJob,,'kd'), best32.);
+  else                             retainedjob_n  = RetainedJob;
+
+  /* keep complete cases */
+  if nmiss(noemp_n, createjob_n, retainedjob_n)=0;
+run;
+
+/* Bubble plot */
+ods graphics / width=860px height=520px;
+title "No. Employees vs Jobs Created (Bubble = Jobs Retained)";
+proc sgplot data=work.jobs_bubble;
+  bubble x=noemp_n y=createjob_n size=retainedjob_n /
+         bradiusmin=4 bradiusmax=18 transparency=0.20
+         group=area                     /* <- remove this if you don't want colors by area */
+         name="b";
+  xaxis label="NoEmp"   grid;
+  yaxis label="CreateJob" grid;
+  keylegend "b" / title="Bubble size = RetainedJob";
+run; title;
+
+/* Bubble plot grouped by Franchise vs Non-Franchise */
+proc format; value fr 0='Non-Franchise' 1='Franchise'; run;
+
+data work.jobs_bubble_fr;
+  set work.portion_prep(keep=NoEmp CreateJob RetainedJob franchise_flag);
+  noemp_n       = input(compress(vvalue(NoEmp),,'kd'), best32.);
+  createjob_n   = input(compress(vvalue(CreateJob),,'kd'), best32.);
+  retainedjob_n = input(compress(vvalue(RetainedJob),,'kd'), best32.);
+  fr = franchise_flag;
+  if nmiss(noemp_n, createjob_n, retainedjob_n, fr)=0;
+  format fr fr.;
+run;
+
+ods graphics / width=860px height=520px;
+title "No. Employees vs Jobs Created (Bubble = Jobs Retained)";
+proc sgplot data=work.jobs_bubble_fr;
+  bubble x=noemp_n y=createjob_n size=retainedjob_n /
+         bradiusmin=4 bradiusmax=18 transparency=0.20
+         group=fr name="b";
+  xaxis label="NoEmp" grid;
+  yaxis label="CreateJob" grid;
+  keylegend "b" / title="Bubble size = RetainedJob";
+run; title;
+
+
+proc iml;
+  use work.jobs_bubble;
+  read all var {noemp_n createjob_n retainedjob_n} into X;
+  close;
+
+  C = corr(X);
+  names = {"NoEmp" "CreateJobs" "RetainedJobs"};
+
+  call heatmapcont(C) xvalues=names yvalues=names
+       colorramp={blue white red} title="Correlation Heat Map";
+quit;
+
+/* Map Recession -> 0/1 and use existing Default_n from loans_prep */
+proc format; value recfmt 0='Not in Recession' 1='In Recession'; run;
+
+data work.loans_rec;
+  set work.loans_prep;                 /* has Default_n already */
+  if vtype(Recession)='C' then Recession_n = (upcase(strip(Recession)) in ('1','Y','YES','T','TRUE'));
+  else                               Recession_n = (Recession=1);
+  format Recession_n recfmt.;
+run;
+
+/* Table: counts (and rate) of defaults by recession status */
+title "Defaults by Recession Status";
+proc sql;
+  select put(Recession_n,recfmt.) as Recession,
+         sum(Default_n)           as Defaults,
+         count(*)                 as N,
+         mean(Default_n) format=percent8.2 as Default_Rate
+  from work.loans_rec
+  where not missing(Recession_n)
+  group by Recession_n;
+quit; title;
+
+
+/* If you already have work.loans_rec from earlier (with Recession_n = 0/1): */
+proc sql;
+  select
+    sum(Recession_n=1) as In_Recession      format=comma.,
+    sum(Recession_n=0) as Not_In_Recession  format=comma.,
+    sum(missing(Recession_n)) as Missing    format=comma.,
+    count(*)                 as Total       format=comma.
+  from work.loans_rec;
+quit;
+
+proc sql;
+  select case(Recession_n) when 1 then 'In Recession' else 'Not in Recession' end as Recession,
+         mean(Default_n) format=percent8.2 as Default_Rate
+  from work.loans_rec
+  where not missing(Recession_n)
+  group by Recession_n;
+quit;
+
+/* Two pies: default rate within each recession class */
+ods graphics / width=520px height=380px;
+
+ods layout gridded columns=2 advance=table;
+
+title "Default Rate — In Recession";
+proc sgpie data=work.loans_rec;
+  where Recession_n=1;
+  pie Default_n / datalabeldisplay=(category percent)
+                  datalabelloc=inside startangle=90;
+  format Default_n defLbl.;
+run;
+
+title "Default Rate — Not in Recession";
+proc sgpie data=work.loans_rec;
+  where Recession_n=0;
+  pie Default_n / datalabeldisplay=(category percent)
+                  datalabelloc=inside startangle=90;
+  format Default_n defLbl.;
+run;
+
+ods layout end;
+title;
+
+
+/* Map to 0/1 on the fly (works whether vars are char or numeric) */
+proc format; value yn 0='No' 1='Yes'; run;
+
+data rev_re;
+  set work.loans_raw;                           /* or work.loans_prep */
+  rev_n = (upcase(strip(vvalue(RevLineCr))) in ('1','Y','YES','T','TRUE'));
+  re_n  = (upcase(strip(vvalue(RealEstate))) in ('1','Y','YES','T','TRUE'));
+  format rev_n re_n yn.;
+run;
+
+/* One-way + two-way frequency table */
+proc freq data=rev_re;
+  tables rev_n re_n rev_n*re_n / missing;
+run;
+
+/* Franchise vs Non-franchise bars: mean Disbursement by Portion bin */
+proc format; value fr 0='Non-Franchise' 1='Franchise'; run;
+
+data d;
+  set work.portion_prep(keep=DisbursementGross portion_frac franchise_flag);
+  disb = inputn(vvalue(DisbursementGross),'dollar32.');
+  pbin = round(portion_frac, 0.05);   /* 5% bins */
+  fr   = franchise_flag;
+  if nmiss(disb,pbin,fr)=0;
+  format disb dollar12. pbin percent8.0 fr fr.;
+run;
+
+title "Mean Disbursement Gross by Portion (5% bins), Franchise vs Non-Franchise";
+proc sgplot data=d;
+  vbar pbin / response=disb stat=mean group=fr groupdisplay=cluster datalabel;
+  yaxis label="Mean Disbursement Gross" valuesformat=dollar12.;
+  xaxis label="Portion";
+run;
+title;
+
+
+title "Average Disbursement Gross by Area";
+proc sql;
+  select area,
+         mean( inputn(cats(DisbursementGross),'dollar32.') ) as Avg_Disbursement format=dollar12.,
+         count(*) as N
+  from work.loans_prep
+  group by area
+  order by case area when 'Urban' then 1 when 'Rural' then 2 else 3 end;
+quit;
+title;
+
+
+
+
+
+
+
 
 
 
