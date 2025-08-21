@@ -1,113 +1,148 @@
-/* ===== 0) Libraries + import (drop-in) ===== */
-%let PROJ_ROOT=/export/viya/homes/41180569@mynwu.ac.za/BWIN621_Assignment_1;   /* change if your path differs */
-libname proj "&PROJ_ROOT";
-libname raw  "&PROJ_ROOT/data/raw";
+/* =========================
+   BWIN621 Assignment 1 EDA
+   (No custom PROC FORMATs)
+   ========================= */
 
-/* Read the first sheet of the Excel file into WORK.LOANS_RAW */
-libname xl xlsx "&PROJ_ROOT/data/raw/SmallBusinessLoans.xlsx";
-proc sql noprint;
-  select memname into :sheet trimmed
-  from dictionary.tables
-  where libname='XL' and memtype='DATA'
-  order by memname;
-quit;
-data work.loans_raw; set xl.&sheet; run;
-libname xl clear;
+/* Root folder (adjust if your path differs) */
+%let PROJ_ROOT=/export/viya/homes/41180569@mynwu.ac.za/BWIN621_Assignment_1;
 
-/* ===== 0b) Build WORK.LOANS (simple, student-friendly) ===== */
-proc format; 
-  value def 0='Non-Default' 1='Default';
-  value fr  0='Non-Franchise' 1='Franchise';
-  value rec 0='Not in Recession' 1='In Recession';
+/* ===== 1) SIMPLE IMPORT (first worksheet) ===== */
+proc import datafile="&PROJ_ROOT/data/raw/SmallBusinessLoans.xlsx"
+    out=work.loans_raw
+    dbms=xlsx
+    replace;
+    getnames=yes;   /* reads header row into variable names */
+    /* (sheet=) omitted → imports FIRST sheet */
 run;
 
-data loans; 
+/* ===== 2) Build WORK.LOANS with simple IF/ELSE cleaning ===== */
+data loans;
   set work.loans_raw;
 
-  /* Area */
-  length area $10;
-  _ur = upcase(strip(vvalue(UrbanRural)));
-  if _ur in ('URBAN','U','1') then area='Urban';
-  else if _ur in ('RURAL','R','2') then area='Rural';
+  /* --- normalize a few fields to text for easy comparisons --- */
+  length area $10
+         default_txt rec_txt rev_txt re_txt ur_txt $12
+         fc_txt $12;
+  default_txt = upcase(strip(cats(Default)));
+  rec_txt     = upcase(strip(cats(Recession)));
+  rev_txt     = upcase(strip(cats(RevLineCr)));
+  re_txt      = upcase(strip(cats(RealEstate)));
+  ur_txt      = upcase(strip(cats(UrbanRural)));
+  fc_txt      = strip(cats(FranchiseCode));
+
+  /* --- Area --- */
+  if ur_txt in ('URBAN','U','1') then area='Urban';
+  else if ur_txt in ('RURAL','R','2') then area='Rural';
   else area='Undefined';
 
-  /* Flags */
-  default_n   = (upcase(strip(vvalue(Default)))   in ('1','Y','YES','T','TRUE'));
-  recession_n = (upcase(strip(vvalue(Recession))) in ('1','Y','YES','T','TRUE'));
-  rev_n       = (upcase(strip(vvalue(RevLineCr))) in ('1','Y','YES','T','TRUE'));
-  re_n        = (upcase(strip(vvalue(RealEstate)))in ('1','Y','YES','T','TRUE'));
+  /* --- Binary flags (0/1) --- */
+  if default_txt in ('1','Y','YES','T','TRUE') then default_n=1;
+  else if default_txt in ('0','N','NO','F','FALSE') then default_n=0;
+  else default_n=.;
 
-  /* FranchiseCode rule: <=1 => Non-Franchise (0), >1 => Franchise (1) */
-  fc = inputn(cats(FranchiseCode),'best32.');
-  if not missing(fc) then franchise = (fc>1);
-  else franchise = .;
+  if rec_txt in ('1','Y','YES','T','TRUE') then recession_n=1;
+  else if rec_txt in ('0','N','NO','F','FALSE') then recession_n=0;
+  else recession_n=.;
 
-  /* Numeric copies used later */
-  disb          = inputn(cats(DisbursementGross),'dollar32.');
-  p             = inputn(cats(Portion),'percent32.');
-  if missing(p) then do; p=inputn(cats(Portion),'comma32.'); if p>1 then p=p/100; end;
-  term_n        = inputn(cats(Term),'best32.');
-  noemp_n       = inputn(cats(NoEmp),'best32.');
-  createjob_n   = inputn(cats(CreateJob),'best32.');
-  retainedjob_n = inputn(cats(RetainedJob),'best32.');
+  if rev_txt in ('1','Y','YES','T','TRUE') then rev_n=1;
+  else if rev_txt in ('0','N','NO','F','FALSE') then rev_n=0;
+  else rev_n=.;
 
-  format default_n def. franchise fr. recession_n rec. disb dollar12. p percent8.2;
-  drop _ur;
+  if re_txt in ('1','Y','YES','T','TRUE') then re_n=1;
+  else if re_txt in ('0','N','NO','F','FALSE') then re_n=0;
+  else re_n=.;
+
+  /* --- Franchise: <=1 => 0; >1 => 1 (treat blank as missing) --- */
+  if fc_txt in ('', '.') then franchise=.;
+  else if fc_txt in ('0','1') then franchise=0;
+  else franchise=1;
+
+  /* --- Numeric copies (assumes PROC IMPORT made these numeric) --- */
+  disb          = DisbursementGross;   /* currency amount */
+  p             = Portion;             /* 0–1 or 0–100 */
+  if not missing(p) and p>1 then p=p/100;
+
+  term_n        = Term;
+  noemp_n       = NoEmp;
+  createjob_n   = CreateJob;
+  retainedjob_n = RetainedJob;
+
+  drop default_txt rec_txt rev_txt re_txt ur_txt fc_txt;
 run;
 
 
-/* ========= 1) Where are defaults happening? — by Area ========= */
+/* ===== 3) Defaults by Area ===== */
 title "Defaults by Area";
 proc freq data=loans; tables area*default_n / norow nocol nopercent; run;
 
 title "Default Rate by Area";
-proc means data=loans mean n maxdec=2; class area; var default_n; format default_n percent8.2; run; title;
+proc means data=loans mean n maxdec=2;
+  class area;
+  var default_n;
+  format default_n percent8.2; /* shows mean of 0/1 as a % */
+run;
+title;
 
 ods graphics / width=520px height=380px;
 title "Default vs Non-Default — Urban";
-proc sgpie data=loans(where=(area='Urban'));   pie default_n / datalabeldisplay=(category percent); run;
+proc sgpie data=loans(where=(area='Urban'));
+  pie default_n / datalabeldisplay=(category percent);
+run;
+
 title "Default vs Non-Default — Rural";
-proc sgpie data=loans(where=(area='Rural'));   pie default_n / datalabeldisplay=(category percent); run;
+proc sgpie data=loans(where=(area='Rural'));
+  pie default_n / datalabeldisplay=(category percent);
+run;
+
 title "Default vs Non-Default — Undefined";
-proc sgpie data=loans(where=(area='Undefined')); pie default_n / datalabeldisplay=(category percent); run; title;
+proc sgpie data=loans(where=(area='Undefined'));
+  pie default_n / datalabeldisplay=(category percent);
+run;
+title;
 
-
-/* ========= 2) Macro environment: Recession vs Not ========= */
+/* ===== 4) Recession vs Not ===== */
 title "Counts by Recession Status";
 proc freq data=loans; tables recession_n / missing; run;
 
 title "Default Rate by Recession Status";
-proc means data=loans mean maxdec=2; class recession_n; var default_n; format default_n percent8.2; run; title;
+proc means data=loans mean maxdec=2;
+  class recession_n;
+  var default_n;
+  format default_n percent8.2;
+run;
+title;
 
 ods graphics / width=520px height=380px;
 title "Default Rate — In Recession";
-proc sgpie data=loans(where=(recession_n=1)); pie default_n / datalabeldisplay=(category percent); run;
+proc sgpie data=loans(where=(recession_n=1));
+  pie default_n / datalabeldisplay=(category percent);
+run;
+
 title "Default Rate — Not in Recession";
-proc sgpie data=loans(where=(recession_n=0)); pie default_n / datalabeldisplay=(category percent); run; title;
+proc sgpie data=loans(where=(recession_n=0));
+  pie default_n / datalabeldisplay=(category percent);
+run;
+title;
 
-
-/* ========= 3) Business model: Franchise vs Non-Franchise ========= */
-/* FC ≤ 1 → Non-Franchise; >1 → Franchise */
-proc format; value fr 0='Non-Franchise (FC≤1)' 1='Franchise (FC>1)'; run;
-
+/* ===== 5) Franchise vs Non-Franchise (FC rule) ===== */
 data fr_rate;
   set loans(keep=default_n FranchiseCode);
   fc = inputn(cats(FranchiseCode),'best32.');
-  if not missing(fc) then fr = (fc>1);
+  if not missing(fc) then fr = (fc>1);  /* 0/1 */
   if nmiss(fr, default_n)=0;
 run;
 
 title "Default Rate by Franchise Status";
 proc sgplot data=fr_rate;
-  vbar fr / response=default_n stat=mean datalabel;
+  vbar fr / response=default_n stat=mean datalabel;  /* x-axis shows 0/1 */
   yaxis label="Default Rate" valuesformat=percent8.1;
-  xaxis label="Franchise Status";
-  format fr fr.;
-run; title;
+  xaxis label="Franchise Status (0=Non, 1=Franchise)";
+run;
+title;
 
 title "Defaults Summary by Franchise Status";
 proc means data=fr_rate n mean sum maxdec=2;
-  class fr; var default_n; format fr fr.;
+  class fr; var default_n;
 run;
 
 proc freq data=fr_rate;
@@ -115,20 +150,19 @@ proc freq data=fr_rate;
   exact fisher;
 run;
 
-
-/* ========= 4) Money matters: Disbursement vs Default ========= */
+/* ===== 6) Disbursement by Default ===== */
 title "Average Disbursement Gross by Default Status";
-proc means data=loans mean n maxdec=2; 
+proc means data=loans mean n maxdec=2;
   class default_n;
-  var disb;                    /* numeric copy of DisbursementGross */
+  var disb;
   format disb dollar12.;
-run; title;
+run;
+title;
 
-
-/* ========= 5) Time risk: Term length and default patterns ========= */
+/* ===== 7) Loan Term effects ===== */
 data loans_bins;
   set loans;
-  if not missing(term_n) then term_bin = 12*floor((term_n-1)/12)+1;
+  if not missing(term_n) then term_bin = 12*floor((term_n-1)/12)+1; /* 1-12, 13-24, ... */
   length term_lbl $11;
   if not missing(term_bin) then term_lbl=cats(put(term_bin,3.),'-',put(term_bin+11,3.));
 run;
@@ -138,9 +172,9 @@ proc sgplot data=loans_bins;
   vbar term_lbl / response=default_n stat=mean datalabel;
   yaxis label="Default Rate" valuesformat=percent8.1;
   xaxis label="Loan Term (months)" discreteorder=data;
-run; title;
+run;
+title;
 
-/* Show bimodal term pattern among defaulters (simple density + histogram) */
 title "Loan Term Distribution of Defaulted Loans (Histogram + Kernel)";
 proc sgplot data=loans;
   where default_n=1 and not missing(term_n);
@@ -148,48 +182,63 @@ proc sgplot data=loans;
   density   term_n / type=kernel;
   xaxis label="Loan Term (months)" min=0 max=300;
   yaxis label="Defaults (count)";
-run; title;
+run;
+title;
 
-
-/* ========= 6) Operations view: Staffing vs Default segments ========= */
+/* ===== 8) Ops view: staffing vs jobs (bubbles) ===== */
 ods graphics / width=860px height=520px;
+
 title "No. Employees vs Jobs Created — Defaulters (Bubble = Jobs Retained)";
 proc sgplot data=loans(where=(default_n=1));
-  bubble x=noemp_n y=createjob_n size=retainedjob_n / group=franchise transparency=0.2 bradiusmin=4 bradiusmax=18;
+  bubble x=noemp_n y=createjob_n size=retainedjob_n
+         / group=franchise transparency=0.2 bradiusmin=4 bradiusmax=18;
   xaxis label="NoEmp"; yaxis label="CreateJob";
-run; title;
+run;
 
 title "No. Employees vs Jobs Created — Non-Defaulters (Bubble = Jobs Retained)";
 proc sgplot data=loans(where=(default_n=0));
-  bubble x=noemp_n y=createjob_n size=retainedjob_n / group=franchise transparency=0.2 bradiusmin=4 bradiusmax=18;
+  bubble x=noemp_n y=createjob_n size=retainedjob_n
+         / group=franchise transparency=0.2 bradiusmin=4 bradiusmax=18;
   xaxis label="NoEmp"; yaxis label="CreateJob";
-run; title;
+run;
+title;
 
-title "Correlation Matrix (NoEmp, CreateJob, RetainedJob)";
-proc corr data=loans plots=matrix(histogram);
+/* Correlation among numeric staffing fields (defaults only) */
+title "Correlation Matrix for Defaults (NoEmp, CreateJob, RetainedJob)";
+proc corr data=loans(where=(default_n=1)) plots=matrix(histogram);
   var noemp_n createjob_n retainedjob_n;
-run; title;
+run;
+
+*There appears to be a negative and non-linear relationship;
+title "Correlation Matrix for Defaults (NoEmp, DisbursementGross)";
+proc corr data=loans(where=(default_n=1)) plots=matrix(histogram);
+  var noemp_n disb; 
+run;
 
 
-/* ========= 7) Credit structure cross-tab (context) ========= */
+title;
+
+/* ===== 9) Credit structure cross-tab ===== */
 title "RevLineCr × RealEstate";
-proc freq data=loans; tables rev_n*re_n / missing; run; title;
+proc freq data=loans; tables rev_n*re_n / missing; run;
+title;
 
-
-/* ========= 8) (Optional appendix) Money by Portion & Franchise ========= */
-data d2; set loans; pbin=round(p,0.05); if nmiss(disb,pbin,franchise)=0; format pbin percent8.; run;
+/* ===== 10) (Appendix) Disbursement by Portion & Franchise ===== */
+data d2;
+  set loans;
+  pbin=round(p,0.05);                 /* 0%, 5%, 10%, ... */
+  if nmiss(disb,pbin,franchise)=0;
+  format pbin percent8.;              /* built-in, optional */
+run;
 
 title "Mean Disbursement Gross by Portion (5% bins), Franchise vs Non-Franchise";
 proc sgplot data=d2;
   vbar pbin / response=disb stat=mean group=franchise groupdisplay=cluster datalabel;
   yaxis valuesformat=dollar12.; xaxis label="Portion";
-run; title;
-
-title "Mean Disbursement Gross by Portion (5% bins) — Defaulters Only";
-proc sgplot data=d2(where=(default_n=1));
-  vbar pbin / response=disb stat=mean group=franchise groupdisplay=cluster datalabel;
-  yaxis valuesformat=dollar12.; xaxis label="Portion";
-run; title;
+run;
 
 title "Average Disbursement Gross by Area";
-proc means data=loans mean n maxdec=2; class area; var disb; format disb dollar12.; run; title;
+proc means data=loans mean n maxdec=2;
+  class area; var disb; format disb dollar12.;
+run;
+title;
