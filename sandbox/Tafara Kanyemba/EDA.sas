@@ -113,16 +113,21 @@ run;
 title;
 
 ods graphics / width=520px height=380px;
-title "Default Rate — In Recession";
-proc sgpie data=loans(where=(recession_n=1));
+title "Default Rate For Urban Areas — In Recession";
+proc sgpie data=loans(where=(recession_n=1 and area="Urban"));
   pie default_n / datalabeldisplay=(category percent);
 run;
 
-title "Default Rate — Not in Recession";
-proc sgpie data=loans(where=(recession_n=0));
+title "Default Rate For Rural Areas — In Recession";
+proc sgpie data=loans(where=(recession_n=1 and area="Rural"));
   pie default_n / datalabeldisplay=(category percent);
 run;
-title;
+
+title "Default Rate For Undefined Areas — In Recession";
+proc sgpie data=loans(where=(recession_n=1 and area="Undefined"));
+  pie default_n / datalabeldisplay=(category percent);
+run;
+
 
 /* ===== 5) Franchise vs Non-Franchise (FC rule) ===== */
 data fr_rate;
