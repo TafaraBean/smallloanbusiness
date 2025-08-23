@@ -1,5 +1,5 @@
 /* =========================
-   BWIN621 Assignment 1 EDA - Tafara Kanyemba
+   BWIN621 Assignment 1 EDA 
    ========================= */
 
 /* --------------- Production header ---------------- */

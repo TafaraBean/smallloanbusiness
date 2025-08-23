@@ -1,22 +1,25 @@
+/*======================================================================
+  TT_Data_Cleaning.sas  —  Data engineering refactor (env + import aware)
+  - Uses project environment (00_env.sas) for libs/paths
+  - Ensures RAW.LOANS is available via 01_import.sas
+  - Applies TT’s transformations and outputs to WRK datasets
+======================================================================*/
 
-/**************************************************/
-/* Import the data from the provided Excel file */
-/**************************************************/
+/* 1) Bootstrap environment (libs RAW/WRK/RES + CODE fileref) */
+%include code("00_env.sas");   /* provided by 00_env.sas */
 
-FILENAME REFFILE '/export/viya/homes/37293168@mynwu.ac.za/BWIN 621 Assignment 1/data/raw/SmallBusinessLoans.xlsx';
+/* 2) Fetch RAW.LOANS from the import module if missing */
+%macro ensure_import;
+  %if %sysfunc(exist(raw.loans))=0 %then %do;
+    %put NOTE: RAW.LOANS not found — invoking sas/01_import.sas ...;
+    %include code("01_import.sas");
+  %end;
+%mend;
+%ensure_import
 
-PROC IMPORT DATAFILE=REFFILE
-	DBMS=XLSX
-	OUT=loans_data;
-	GETNAMES=YES;
-RUN;
-
-/**************************************************/
-/* Clean and modify the date to be able to use it */
-/**************************************************/
-
-data loans_clean;
-    set loans_data;
+/* 3) Data engineering shell: read RAW, write WRK  */
+data wrk.loans_stage;
+  set raw.loans;
     
     /* Recode RevLineCr */
 	if RevLineCr = 'Y' then RevLineCr_num = 1;
@@ -56,6 +59,30 @@ run;
 /* Performing basic Linear and Logistic regression on test data*/
 /**************************************************/
 
+/* 4) Optional: split into development/hold-out if Selected exists */
+%macro split_if_selected;
+  %local dsid varnum rc;
+  %let dsid  = %sysfunc(open(wrk.loans_stage,i));
+  %let varnum= %sysfunc(varnum(&dsid,Selected));
+  %let rc    = %sysfunc(close(&dsid));
+
+  %if &varnum > 0 %then %do;
+    data wrk.dev wrk.hold;
+      set wrk.loans_stage;
+      if Selected=1 then output wrk.dev;
+      else output wrk.hold;
+    run;
+    %put NOTE: Split complete → WRK.DEV (Selected=1) and WRK.HOLD (Selected=0).;
+  %end;
+  %else %do;
+    data wrk.dev; set wrk.loans_stage; run;
+    %put NOTE: Variable Selected not found — using WRK.DEV only.;
+  %end;
+%mend;
+%split_if_selected
+
+/* 5) Quick visibility (safe to keep) */
+proc contents data=wrk.dev;   title "WRK.DEV structure after TT cleaning"; run;
 
 /* 1. Linear Regression */
 proc glm data=loans_clean_test;
