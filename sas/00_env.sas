@@ -1,9 +1,11 @@
 /**************************************************************************
+
 * 00_env.sas — Portable bootstrap for SAS Viya + GitHub repo
 **************************************************************************/
 options dlcreatedir fullstimer;
 
 /* Optional manual override (leave blank for auto-detect) */
+/* i.e paste the path of where you saved the project after "root_override=" and it will overide the automaticepath detection*/
 %let root_override=;
 
 /* ---- One macro to do everything (no nested %IF in open code) ---- */

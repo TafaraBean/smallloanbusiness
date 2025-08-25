@@ -1,10 +1,8 @@
 /*===============================================================
-  01_import.sas — Excel → RAW.LOANS (simple, idempotent)
-  - Includes 00_env.sas (no hard-coded paths)
-  - Imports first sheet by default (or supply a sheet=)
+  01_import.sas - Excel -> RAW.LOANS 
 ===============================================================*/
 
-/* 0) Bootstrap environment (portable include from this file's folder) */
+/* 0) Bootstrap environment (include from this file's folder) */
 %let _pgm=%sysfunc(dequote(&_SASPROGRAMFILE));
 %let _dir=%substr(&_pgm,1,%eval(%length(&_pgm)-%length(%scan(&_pgm,-1,'/'))-1));
 %include "&_dir/00_env.sas";
@@ -18,7 +16,7 @@
     %return;
   %end;
 
-  /* b) Already imported? */
+  /* b) is Excel sheet already imported? */
   %if %sysfunc(exist(&out)) %then %do;
     %put NOTE: &out already exists — skipping import.;
     %return;
@@ -39,6 +37,6 @@
   proc contents data=&out; title "Imported: &out"; run;
 %mend;
 
-/* 2) Call it (no sheet name → first sheet) */
+/* 2) Call it (if no sheet name exists -> first sheet) */
 %import_loans()
 title;

@@ -33,12 +33,12 @@
   %if %sysfunc(exist(&ds))=0 %then %do; %put ERROR: &msg; %abort cancel; %end;
 %mend;
 %assert(models.logit_step_model, Missing model artifact MODELS.LOGIT_STEP_MODEL. Run 04_model.sas.)
-/* If you prefer full model, change champion below */
 
-/* 1) Champion selector (easy to swap) */
-%let champion = logit_step_model;   /* or logit_full_model */
 
-/* 2) Pick dataset to score: HOLD if exists, else DEV */
+/* 1) Champion model selector - the model that is being fit */
+%let champion = logit_step_model;   
+
+/* 2) Pick dataset to score */
 %macro pick_toscore;
   %global _toscore _tag;
   %if %sysfunc(exist(wrk.hold)) %then %do; %let _toscore=wrk.hold; %let _tag=hold; %end;
