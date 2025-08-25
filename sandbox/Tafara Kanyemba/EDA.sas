@@ -247,3 +247,43 @@ proc means data=loans mean n maxdec=2;
   class area; var disb; format disb dollar12.;
 run;
 title;
+
+
+*Appendix;
+
+ods graphics on;
+
+title "Number of Defaults: New vs Existing (raw values)";
+proc freq data=work.loans order=data;
+  where Default=1;                         /* only defaulted loans */
+  tables New / plots=freqplot(scale=Freq);
+run;
+title;
+
+*the number of defaults is much higher for existing businesses. is this a result of calss imbalance?;
+
+ods graphics on;
+
+/* 1) Get counts + row percentages for New x Default */
+proc freq data=work.loans noprint;
+  tables New*Default / out=work._rates outpct;
+run;
+
+/* 2) Keep the Default=1 rows and convert row % to a proper percent format */
+data work._default_rate;
+  set work._rates;
+  where Default=1;                 /* defaulted bucket */
+  rate = pct_row / 100;            /* pct_row is 0–100; convert to 0–1 */
+  format rate percent8.1;
+run;
+
+/* 3) Plot the default rate per New */
+title "Default Rate by Business Type (Default=1 within each New)";
+proc sgplot data=work._default_rate;
+  vbarparm category=New response=rate / datalabel;
+  yaxis label="Default rate" values=(0 to 1 by 0.1) valuesformat=percent8.0;
+  xaxis label="New (raw values)";
+run;
+title;
+
+
