@@ -16,7 +16,7 @@
 %end;
 
 
-/* ===== Build WORK.LOANS ===== */
+/* ===== Build WORK.LOANS dataframe ===== */
 data loans;
   set raw.loans;
 
@@ -227,7 +227,7 @@ title "RevLineCr × RealEstate";
 proc freq data=loans; tables rev_n*re_n / missing; run;
 title;
 
-/* ===== 10) (Appendix) Disbursement by Portion & Franchise ===== */
+/* ===== 10) Disbursement by Portion & Franchise ===== */
 data d2;
   set loans;
   pbin=round(p,0.05);                 /* 0%, 5%, 10%, ... */

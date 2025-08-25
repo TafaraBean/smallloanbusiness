@@ -17,6 +17,25 @@
 ods listing gpath="&edadir";
 
 /* C) Safety assertions */
+/*---------------------------------------------------------------
+  %assert(ds, msg)
+  Purpose: "Fail fast" guard. Stops the run if a required table
+           does not exist.
+
+  How it works:
+    - %sysfunc(exist(&ds)) checks whether the two-level SAS data
+      set &ds (e.g., WRK.DEV) exists. Returns 1 if found, 0 if not.
+    - If 0, write a clear ERROR line to the log with &msg
+      and abort the current program submission (%abort cancel)
+      so downstream steps don’t run on a bad state.
+
+  Example:
+    %assert(raw.loans, RAW.LOANS not found even after import.)
+----------------------------------------------------------------*/
+%macro assert(ds, msg);
+  %if %sysfunc(exist(&ds))=0 %then %do; %put ERROR: &msg; %abort cancel; %end;
+%mend;
+
 %macro assert(ds, msg);
   %if %sysfunc(exist(&ds))=0 %then %do; %put ERROR: &msg; %abort cancel; %end;
 %mend;
@@ -37,6 +56,6 @@ title "Project summary";
 proc datasets lib=raw nolist;  contents data=_all_ out=_rawc(keep=memname nobs) noprint; quit;
 proc datasets lib=wrk nolist;  contents data=_all_ out=_wrkc(keep=memname nobs) noprint; quit;
 
-proc print data=_rawc; title2 "RAW library tables"; run;
-proc print data=_wrkc; title2 "WRK library tables"; run;
+proc print data=_raw; title2 "RAW library tables"; run;
+proc print data=_wrk; title2 "WRK library tables"; run;
 title;
