@@ -1,6 +1,6 @@
 /**************************************************************************
-
-* 00_env.sas — Portable bootstrap for SAS Viya + GitHub repo
+	* 00_env.sas — Portable bootstrap for SAS Viya + GitHub repo
+	- Coded by Tapiwa Gweshe
 **************************************************************************/
 options dlcreatedir fullstimer;
 
@@ -8,7 +8,7 @@ options dlcreatedir fullstimer;
 /* i.e paste the path of where you saved the project after "root_override=" and it will overide the automaticepath detection*/
 %let root_override=;
 
-/* ---- One macro to do everything (no nested %IF in open code) ---- */
+/* ---- One macro to do everything  ---- */
 %macro setup_env();
   %global root RAW_PATH WRK_PATH RES_PATH;
 

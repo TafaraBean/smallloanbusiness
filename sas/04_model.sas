@@ -1,5 +1,6 @@
 /*===============================================================
   04_model.sas — fit logistic models and save artifacts
+  - Tlangelani Motloung
 ===============================================================*/
 
 /* 0) Bootstrap env */

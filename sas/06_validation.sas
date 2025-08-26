@@ -5,6 +5,7 @@
   - Youden-J cut, AUC (trapezoid), confusion matrices
   - 10-fold CV on DEV (@0.5)
   - ROC overlay (Old vs New) saved to results/validation/plots
+  - Coded by Shahil Mathapershad
 ===============================================================*/
 
 /* keep the log tidy for heavy steps */
