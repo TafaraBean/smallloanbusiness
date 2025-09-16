@@ -1,121 +1,87 @@
-/*======================================================================
-  TT_Data_Cleaning.sas  —  Data engineering refactor (env + import aware)
-  - Uses project environment (00_env.sas) for libs/paths
-  - Ensures RAW.LOANS is available via 01_import.sas
-  - Applies TT’s transformations and outputs to WRK datasets
-======================================================================*/
 
-/* 1) Bootstrap environment (libs RAW/WRK/RES + CODE fileref) */
-%include code("00_env.sas");   /* provided by 00_env.sas */
+/* Locate this program's folder and mount it as a libref */
+%let _pgm=%sysfunc(dequote(&_SASPROGRAMFILE));
+%let _dir=%substr(&_pgm,1,%eval(%length(&_pgm)-%length(%scan(&_pgm,-1,'/'))-1));
+libname here "&_dir";
 
-/* 2) Fetch RAW.LOANS from the import module if missing */
-%macro ensure_import;
-  %if %sysfunc(exist(raw.loans))=0 %then %do;
-    %put NOTE: RAW.LOANS not found — invoking sas/01_import.sas ...;
-    %include code("01_import.sas");
-  %end;
+/* Change this if your file isn't named loans.sas7bdat */
+%let INSET=loans;
+
+/* Guard */
+%macro assert(ds,msg);
+  %if %sysfunc(exist(&ds))=0 %then %do; %put ERROR: &msg; %abort cancel; %end;
 %mend;
-%ensure_import
+%assert(here.&INSET, Expected dataset here.&INSET not found in &_dir)
 
-/* 3) Data engineering shell: read RAW, write WRK  */
-data wrk.loans_stage;
-  set raw.loans;
-    
-    /* Recode RevLineCr */
-	if RevLineCr = 'Y' then RevLineCr_num = 1;
-	else if RevLineCr = 'T' then RevLineCr_num = 1;
-	else if RevLineCr = 'N' then RevLineCr_num = 0;
-	else RevLineCr_num = 0;
-		
-	drop RevLineCr; /* Drop the original character variable */
-	rename RevLineCr_num = RevLineCr; 
-	    
-    /* Note:
-    	Because  there are only 2 null values out of 2100, 
-    	we believe that the assignment of the these values
-    	will have very little impact. Hence, we have chosen
-    	to assign zero(0), as this is the mode of the data
-    */
-   
-    
-    /* Recode FranchiseCode */
-   if FranchiseCode <= 1 then FranchiseCode = 0;
-   else FranchiseCode = 1;
-    
-    drop Name LoanNr_ChkDgt Zip New WrittenOff BalanceGross;
+/* ===== Data engineering  ===== */
+data here.loans_stage;
+  set here.&INSET;
+
+  /* RevLineCr -> 0/1 (treat NULL/other as 0) */
+  if RevLineCr in ('Y','T') then RevLineCr_num=1;
+  else RevLineCr_num=0;
+  drop RevLineCr;
+  rename RevLineCr_num=RevLineCr;
+
+  /* FranchiseCode -> binary */
+  if FranchiseCode<=1 then FranchiseCode=0;
+  else FranchiseCode=1;
+
+  /* Drop obvious IDs / unused */
+  drop Name LoanNr_ChkDgt Zip New WrittenOff BalanceGross;
 run;
 
-/**************************************************/
-/* Split the data into training and testing set */
-/**************************************************/
-
-data loans_clean_test loans_clean_train;
-	set loans_clean;
-	if selected = 1 then output loans_clean_train;
-	else output loans_clean_test;
-run;
-
-/**************************************************/
-/* Performing basic Linear and Logistic regression on test data*/
-/**************************************************/
-
-/* 4) Optional: split into development/hold-out if Selected exists */
+/* ===== Split: train/test using Selected if present ===== */
 %macro split_if_selected;
-  %local dsid varnum rc;
-  %let dsid  = %sysfunc(open(wrk.loans_stage,i));
-  %let varnum= %sysfunc(varnum(&dsid,Selected));
-  %let rc    = %sysfunc(close(&dsid));
+  %local dsid pos rc;
+  %let dsid=%sysfunc(open(here.loans_stage,i));
+  %let pos=%sysfunc(varnum(&dsid,Selected));
+  %let rc=%sysfunc(close(&dsid));
 
-  %if &varnum > 0 %then %do;
-    data wrk.dev wrk.hold;
-      set wrk.loans_stage;
-      if Selected=1 then output wrk.dev;
-      else output wrk.hold;
+  %if &pos>0 %then %do;
+    data here.loans_clean_train here.loans_clean_test;
+      set here.loans_stage;
+      if Selected=1 then output here.loans_clean_train;
+      else output here.loans_clean_test;
     run;
-    %put NOTE: Split complete → WRK.DEV (Selected=1) and WRK.HOLD (Selected=0).;
+    %put NOTE: Split done -> here.loans_clean_train (Selected=1), here.loans_clean_test (Selected=0).;
   %end;
   %else %do;
-    data wrk.dev; set wrk.loans_stage; run;
-    %put NOTE: Variable Selected not found — using WRK.DEV only.;
+    data here.loans_clean_train; set here.loans_stage; run;
+    data here.loans_clean_test;  set here.loans_stage(obs=0); run;  /* empty test */
+    %put NOTE: Selected not found — train has all rows; test is empty.;
   %end;
 %mend;
 %split_if_selected
 
-/* 5) Quick visibility (safe to keep) */
-proc contents data=wrk.dev;   title "WRK.DEV structure after TT cleaning"; run;
+/* ===== Quick visibility ===== */
+title "Structure after cleaning (here.loans_clean_train)";
+proc contents data=here.loans_clean_train; run; title;
 
-/* 1. Linear Regression */
-proc glm data=loans_clean_test;
-    class UrbanRural RevLineCr RealEstate Recession FranchiseCode;
-    model Default = Term NoEmp CreateJob RetainedJob FranchiseCode 
-                   UrbanRural RevLineCr DisbursementGross RealEstate 
-                   Portion Recession ;
-    title 'Linear Regression for Default Prediction';
-    
-    output out=res_data r=resid p=pred;
+/* ===== Quick GLM on TEST set ===== */
+proc glm data=here.loans_clean_test;
+  class UrbanRural RevLineCr RealEstate Recession FranchiseCode;
+  model Default = Term NoEmp CreateJob RetainedJob FranchiseCode
+                  UrbanRural RevLineCr DisbursementGross RealEstate
+                  Portion Recession;
+  title 'Linear Regression for Default Prediction';
+  output out=here.res_data r=resid p=pred;
+run; quit;
+
+proc univariate data=here.res_data normal;
+  var resid; histogram resid; qqplot resid / normal(mu=est sigma=est);
 run;
 
+proc sgplot data=here.res_data;
+  scatter x=pred y=resid;
+  title 'Residuals vs Predictions (TEST set)';
+run; title;
 
-/* Testing assumptions */
-proc univariate data = res_data normal;
-	var resid;
-	hist resid;
-	qqplot resid / normal(mu=est sigma=est);
-run;
-
-proc sgplot data = res_data;
-	scatter x=pred y=resid;
-	title 'Scatter Plot of resid vs pred';
-run;
-
-
-
-
-/* 2. Logistic Regression */
-proc logistic data=loans_clean_test;
-    class UrbanRural RevLineCr RealEstate Recession FranchiseCode;
-    model Default(event='1') = Term NoEmp CreateJob RetainedJob FranchiseCode 
-                              UrbanRural RevLineCr DisbursementGross RealEstate 
-                              Portion Recession;
-    title 'Logistic Regression for Default Prediction';
-run;
+/* ===== Quick LOGISTIC on training set ===== */
+proc logistic data=here.loans_clean_train;
+  class UrbanRural RevLineCr RealEstate Recession FranchiseCode / param=ref;
+  model Default(event='1') = Term NoEmp CreateJob RetainedJob FranchiseCode
+                             UrbanRural RevLineCr DisbursementGross RealEstate
+                             Portion Recession;
+  title 'Logistic Regression for Default Prediction';
+run; title;
