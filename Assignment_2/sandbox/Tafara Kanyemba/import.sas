@@ -42,7 +42,7 @@ data here.oot_raw; set here.oot_raw;
     if Default = 1 then bad_flag = 1; else bad_flag = 0;
 run;
 
-/* Step 3: Counts and default prevalence for DEV, OOS, and OOT */
+/*this code creates 3 tables with 2 columns each for the counts and default rate*/
 proc sql;
     create table work.counts_dev as
     select count(*) as Total_Records,
@@ -97,32 +97,43 @@ proc export data=work.data_dictionary_clean
 run;
 
 /* Step 6: Quick missing-value checks */
+
 proc means data=here.dev_raw n nmiss;
     title "Missing Numeric Values - DEV";
 run;
 
+ods trace on;
+ods exclude Freq.Table1.OneWayFreqs;
 proc freq data=here.dev_raw;
     tables _character_ / missing;
     title "Missing Character Values - DEV";
 run;
+ods exclude none;
+ods trace off;
 
 proc means data=here.oos_raw n nmiss;
     title "Missing Numeric Values - OOS";
 run;
 
+ods trace on;
+ods exclude Freq.Table1.OneWayFreqs;
 proc freq data=here.oos_raw;
     tables _character_ / missing;
     title "Missing Character Values - OOS";
 run;
+ods exclude none;
+ods trace off;
 
 proc means data=here.oot_raw n nmiss;
     title "Missing Numeric Values - OOT";
 run;
 
+ods exclude Freq.Table1.OneWayFreqs;
 proc freq data=here.oot_raw;
     tables _character_ / missing;
     title "Missing Character Values - OOT";
 run;
+ods exclude none;
 
 title;
 
@@ -141,18 +152,17 @@ proc print data=work.data_dictionary_clean(obs=20); run;
 
 title;
 
-/* ==========================================================
-   Step 8: Average Jobs Created per dataset (DEV, OOS, OOT)
-   ========================================================== */
+* we create a economic indicator to look at whether the econoic conditions are the same;
+* getting the average number of jobs created;
 
 proc sql;
-    create table work.avg_jobs_created as
+    create table work.avg_jobs_created as  /*create a table*/
     select "DEV" as Dataset, mean(CreateJob) as Avg_Jobs_Created
     from here.dev_raw
-    union all
+    union all /*combine the preceding table with the following table*/
     select "OOS", mean(CreateJob)
     from here.oos_raw
-    union all
+    union all /*again*/
     select "OOT", mean(CreateJob)
     from here.oot_raw;
 quit;
@@ -172,6 +182,9 @@ proc sgplot data=work.avg_jobs_created;
 run;
 
 title;
+
+
+/* a second economic indicator /*
 
 /* ==========================================================
    Step 9: Average Jobs Retained per dataset (DEV, OOS, OOT)

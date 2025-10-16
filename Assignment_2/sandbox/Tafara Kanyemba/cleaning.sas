@@ -7,6 +7,7 @@
 libname here "&PROJ_ROOT/sasdata";
 
 /* --- Apply A1 cleaning to OOS --- */
+* the mode for RevLineCr is 0 for each dataset ;
 data here.oos_prep;
   set here.oos_raw;
 
@@ -15,7 +16,7 @@ data here.oos_prep;
   _rev = upcase(strip(cats(RevLineCr)));
   if      _rev in ('1','Y','YES','T','TRUE') then RevLineCr_num=1;
   else if _rev in ('0','N','NO','F','FALSE') then RevLineCr_num=0;
-  else                                        RevLineCr_num=0;
+  else                                        RevLineCr_num=0; /* this is how we impute */
   drop RevLineCr _rev;
   rename RevLineCr_num=RevLineCr;
 
