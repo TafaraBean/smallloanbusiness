@@ -1,0 +1,7 @@
+Variable,ClassVal0,DF,Estimate,StdErr,WaldChiSq,ProbChiSq,StandardizedEst,_ESTTYPE_
+Intercept,,1,7.5323,0.9942,57.3977,<.0001,_,MLE
+Term,,1,-0.0426,0.00374,129.6674,<.0001,-2.2269,MLE
+UrbanRural,0,1,-1.9345,0.4929,15.4045,<.0001,-0.3331,MLE
+UrbanRural,1,1,-0.3112,0.3113,0.9997,0.3174,-0.0644,MLE
+RevLineCr,0,1,0.4781,0.1847,6.7042,0.0096,0.1275,MLE
+RealEstate,0,1,-4.6780,0.7218,42.0065,<.0001,-1.1630,MLE

@@ -1,0 +1,5 @@
+Label1,cValue1,nValue1,Label2,cValue2,nValue2
+Percent Concordant,88.3,88.266197,Somers' D,0.766,0.766176
+Percent Discordant,11.6,11.648624,Gamma,0.767,0.766829
+Percent Tied,0.1,0.085180,Tau-a,0.331,0.330923
+Pairs,238320,238320,c,0.883,0.883088

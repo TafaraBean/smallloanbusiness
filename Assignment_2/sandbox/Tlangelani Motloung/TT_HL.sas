@@ -31,3 +31,7 @@ proc logistic data=loans_clean(where=(Selected=1)) outmodel = logistic_model plo
         Portion Recession
         / selection=stepwise slentry=0.05 slstay=0.05 lackfit;
 run;
+
+proc logistic inmodel=logistic_model;
+  score data=loans_clean(where=(Selected=0)) out=predictions;
+run;
