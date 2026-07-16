@@ -1,0 +1,7 @@
+{
+  "bundle": "t003_model",
+  "source_file": "sas/04_model.sas",
+  "source_blob_sha": "93b425483c76ba5b0997b767937ced498a32fef0",
+  "source_commit": "8910b7a00efb9537011be8d0f47cacc02b232360",
+  "notes": "Adapted the two PROC LOGISTIC calls (full model, then stepwise-reduced with slentry/slstay=0.05) from 04_model.sas (Tlangelani Motloung), predictor list and CLASS statement unchanged. RES/MODELS libnames replaced with WORK datasets; the RAW.LOANS Excel import + 03_clean.sas cleaning was inlined as 80 sampled rows from data/raw/SmallBusinessLoans.xlsx cleaned the same way (RevLineCr recode, FranchiseCode binarize). The full model hits a genuine quasi-complete-separation warning at this sample size (documented PROC LOGISTIC behavior); the stepwise model converges cleanly."
+}

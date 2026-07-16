@@ -1,0 +1,7 @@
+{
+  "bundle": "t004_score",
+  "source_file": "sas/05_score.sas",
+  "source_blob_sha": "41aedfc537a1c9cba6788ae4e66c25e6fe3c8618",
+  "source_commit": "8910b7a00efb9537011be8d0f47cacc02b232360",
+  "notes": "Adapted the PD->Points (PDO) transform, scoring preview/summary, and the _cm_metrics confusion-matrix macro from 05_score.sas (Tapiwa Gweshe), copied verbatim. The MODELS/SCORE libname plumbing and the PROC LOGISTIC INMODEL=/SCORE re-scoring step were replaced with an equivalent single-pass fit+OUTPUT (PROC LOGISTIC ... OUTPUT OUT= P=) against the same inline 80-row sample used across this repo's bundles, fitting the same full and stepwise models as 04_model.sas. Jenner's PROC LOGISTIC INMODEL=/SCORE path (as used verbatim in the original script) currently no-ops with a warning rather than scoring -- see the accompanying set/ regression test; this bundle routes around it so the confusion-matrix and PDO-points logic still ships as a real, passing test."
+}

@@ -1,0 +1,30 @@
+                                                   DEV after cleaning
+
+
+PROC CONTENTS
+-------------------------------------------------------------------------------
+
+Data Set Name: dev
+Observations:  12
+Variables:     13
+
+Variables (in alphabetical order):
+
+  #  Variable           Type    Len  Format  Label
+---  -----------------  ----  -----  ------  -----
+  1  CreateJob           Num      8          
+  2  Default             Num      8          
+  3  DisbursementGross   Num      8          
+  4  FranchiseCode       Num      8          
+  5  NoEmp               Num      8          
+  6  Portion             Num      8          
+  7  RealEstate          Num      8          
+  8  Recession           Num      8          
+  9  RetainedJob         Num      8          
+ 10  RevLineCr           Num      8          
+ 11  Selected            Num      8          
+ 12  Term                Num      8          
+ 13  UrbanRural          Num      8          
+
+-------------------------------------------------------------------------------
+

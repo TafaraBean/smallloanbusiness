@@ -1,0 +1,7 @@
+{
+  "bundle": "t001_eda",
+  "source_file": "sas/02_eda.sas",
+  "source_blob_sha": "a0d07c5f594271c6ecfba6025d49667e07755043",
+  "source_commit": "8910b7a00efb9537011be8d0f47cacc02b232360",
+  "notes": "Adapted the area/recession/franchise/disbursement/credit-structure EDA sections of 02_eda.sas (Tafara Kanyemba). The Excel LIBNAME import (raw.loans) was replaced with 29 inline rows sampled from data/raw/SmallBusinessLoans.xlsx (same 19 columns), mixing defaulted and non-defaulted loans. SGPIE/SGPLOT graphics sections were dropped for a deterministic, image-free tabular bundle; the derivation and PROC FREQ/MEANS logic is unchanged."
+}

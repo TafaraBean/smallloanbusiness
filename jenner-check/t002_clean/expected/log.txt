@@ -1,0 +1,43 @@
+NOTE: Jenner v1.5.30 (build v1.5.30+unknown.20260715T062217Z.x86_64-unknown-linux-gnu)
+
+NOTE: Option OBS changed to 100.
+NOTE: DATA raw_loans
+
+NOTE: Processing inline DATALINES (29 lines)
+
+NOTE: Read 29 rows from DATALINES.
+NOTE: Wrote raw_loans (29 rows, 19 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA loans_stage
+
+
+NOTE: Read 29 rows from raw_loans.
+NOTE: Wrote loans_stage (29 rows, 13 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA dev hold
+
+NOTE: Multi-output DATA step splits stream into: dev hold
+
+NOTE: Read 29 rows from loans_stage.
+NOTE: Wrote dev (12 rows, 13 columns).
+NOTE: Wrote hold (17 rows, 13 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA loans_clean_train loans_clean_test
+
+NOTE: Multi-output DATA step splits stream into: loans_clean_train loans_clean_test
+
+NOTE: Read 29 rows from loans_stage.
+NOTE: Wrote loans_clean_train (12 rows, 13 columns).
+NOTE: Wrote loans_clean_test (17 rows, 13 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC CONTENTS data=dev
+
+NOTE: PROC CONTENTS completed: 12 observations, 13 variables

@@ -1,0 +1,42 @@
+NOTE: Jenner v1.5.30 (build v1.5.30+unknown.20260715T062217Z.x86_64-unknown-linux-gnu)
+
+NOTE: Option OBS changed to 100.
+NOTE: DATA raw_loans
+
+NOTE: Processing inline DATALINES (80 lines)
+
+NOTE: Read 80 rows from DATALINES.
+NOTE: Wrote raw_loans (80 rows, 19 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA dev
+
+
+NOTE: Read 80 rows from raw_loans.
+NOTE: Wrote dev (80 rows, 13 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: ODS OUTPUT: PARAMETERESTIMATES -> full_params
+NOTE: PROC LOGISTIC data=dev
+
+NOTE: Using Python statsmodels.api.Logit version 0.14.6
+NOTE: Output dataset dev_full_scored written with 80 observations.
+NOTE: OUTMODEL dataset logit_full_model written.
+NOTE: PROC LOGISTIC completed. Results written to: ./ods_output/logistic_results.spec.json
+NOTE: ODS OUTPUT: PARAMETERESTIMATES -> step_params
+NOTE: PROC LOGISTIC data=dev
+
+NOTE: Using Python statsmodels.api.Logit version 0.14.6
+NOTE: Output dataset dev_step_scored written with 80 observations.
+NOTE: OUTMODEL dataset logit_step_model written.
+NOTE: PROC LOGISTIC completed. Results written to: ./ods_output/logistic_results.spec.json
+NOTE: Option TITLE changed to Full model parameter estimates.
+NOTE: PROC PRINT data=full_params
+
+NOTE: PROC PRINT completed: 13 observations printed, 6 variables
+NOTE: Option TITLE changed to Stepwise model parameter estimates.
+NOTE: PROC PRINT data=step_params
+
+NOTE: PROC PRINT completed: 4 observations printed, 6 variables

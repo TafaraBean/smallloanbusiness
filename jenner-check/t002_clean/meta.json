@@ -1,0 +1,7 @@
+{
+  "bundle": "t002_clean",
+  "source_file": "sas/03_clean.sas",
+  "source_blob_sha": "f43588b15142b517389e93da9578388c5a297db2",
+  "source_commit": "8910b7a00efb9537011be8d0f47cacc02b232360",
+  "notes": "Adapted the cleaning + dev/hold split logic of 03_clean.sas. The raw.loans WRK/RAW libname setup was replaced with the same 29-row inline sample used across this repo's bundles; the RevLineCr recode, FranchiseCode binarize, ID-column drop, and Selected-based dev/hold split are unchanged."
+}

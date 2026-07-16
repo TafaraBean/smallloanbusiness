@@ -1,0 +1,14 @@
+{
+  "_captured_at": "2026-07-16T07:44:00Z",
+  "_captured_run_id": "r_dd801b595f2e4529a91e25dae137b3e5",
+  "status": "ok",
+  "exit_code": 0,
+  "log_contains": [
+    "NOTE: Wrote raw_loans (80 rows, 19 columns).",
+    "NOTE: Wrote dev (80 rows, 13 columns).",
+    "NOTE: Output dataset dev_full_scored written with 80 observations.",
+    "NOTE: Output dataset dev_step_scored written with 80 observations."
+  ],
+  "log_does_not_contain": ["ERROR:", "[JENNER-ERROR"],
+  "diagnostics": {"parse_warnings": [], "runtime_warnings": []}
+}

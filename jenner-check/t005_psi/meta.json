@@ -1,0 +1,7 @@
+{
+  "bundle": "t005_psi",
+  "source_file": "Assignment_2/sandbox/Tlangelani Motloung/TT_PSI.sas",
+  "source_blob_sha": "25192beeb9f0407ea3925287148e5c511fa80248",
+  "source_commit": "8910b7a00efb9537011be8d0f47cacc02b232360",
+  "notes": "Adapted the Population Stability Index section of TT_PSI.sas (Tlangelani Motloung): the score-bin DATA steps, PROC FREQ distribution tabulation, and the PROC SQL full-join PSI formula are copied unchanged. The OOS/OOT Excel imports and the model fit + INMODEL=/SCORE re-scoring steps were replaced with two inline 30-row PD score samples (OOS = 'expected', OOT = an upward-shifted 'actual' standing in for population drift), since Jenner's PROC LOGISTIC INMODEL=/SCORE path currently no-ops (see the accompanying set/ regression test)."
+}
