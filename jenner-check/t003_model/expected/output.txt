@@ -1,0 +1,173 @@
+                                     
+---------------------------  --------
+Number of Observations Read        80
+Number of Observations Used        80
+
+            Response Profile            
+   Probability modeled is Default='1'   
+
+Ordered Value  Default   Total Frequency
+-------------  --------  ---------------
+            1  0                      45
+            2  1                      35
+
+     Class Level Information     
+
+Class            Levels  Values  
+-------------  --------  --------
+UrbanRural            3  0 1 2   
+RevLineCr             2  0 1     
+RealEstate            2  0 1     
+Recession             2  0 1     
+FranchiseCode         2  0 1     
+
+                                    
+------------------------------------
+WARNING: The model did not converge.
+
+                                                                                                                     
+---------------------------------------------------------------------------------------------------------------------
+WARNING: There is possibly a quasi-complete separation of data points. The maximum likelihood estimate may not exist.
+
+The LOGISTIC Procedure
+Response Variable: Default
+
+Criterion     Value
+---------  --------
+AIC          94.570
+-2 Log L     68.570
+SC          125.536
+
+                Analysis of Maximum Likelihood Estimates                
+
+Parameter          Estimate  Standard Error  Wald Chi-Square  Pr > ChiSq
+-----------------  --------  --------------  ---------------  ----------
+Intercept           23.7653          9.0927           6.8312      0.0090
+Term                -0.0638          0.0160          15.9675      <.0001
+NoEmp               -0.0242          0.0430           0.3156      0.5742
+CreateJob           -0.3907          0.2075           3.5449      0.0597
+RetainedJob          0.0419          0.0572           0.5356      0.4643
+FranchiseCode      -11.9021          7.4278           2.5676      0.1091
+UrbanRural           0.5217          2.5269           0.0426      0.8364
+UrbanRural           1.0668          1.9653           0.2947      0.5872
+RevLineCr            0.8992          0.8299           1.1739      0.2786
+RealEstate         -10.5465          3.0061          12.3082      0.0005
+Recession            0.7909          1.1386           0.4825      0.4873
+DisbursementGross    0.0000          0.0000           1.6478      0.1993
+Portion              1.8927          2.8053           0.4552      0.4999
+
+                         Odds Ratio Estimates                          
+
+Effect             Point Estimate  95% Wald CL Lower  95% Wald CL Upper
+-----------------  --------------  -----------------  -----------------
+FranchiseCode               0.000              0.000             14.241
+UrbanRural                  1.685              0.012            238.468
+UrbanRural                  2.906              0.062            136.824
+RevLineCr                   2.458              0.483             12.501
+RealEstate                  0.000              0.000              0.010
+Recession                   2.205              0.237             20.545
+Term                        0.938              0.909              0.968
+NoEmp                       0.976              0.897              1.062
+CreateJob                   0.677              0.450              1.016
+RetainedJob                 1.043              0.932              1.167
+DisbursementGross           1.000              1.000              1.000
+Portion                     6.637              0.027           1621.160
+
+                                     
+---------------------------  --------
+Number of Observations Read        80
+Number of Observations Used        80
+
+            Response Profile            
+   Probability modeled is Default='1'   
+
+Ordered Value  Default   Total Frequency
+-------------  --------  ---------------
+            1  0                      45
+            2  1                      35
+
+     Class Level Information     
+
+Class            Levels  Values  
+-------------  --------  --------
+UrbanRural            3  0 1 2   
+RevLineCr             2  0 1     
+RealEstate            2  0 1     
+Recession             2  0 1     
+FranchiseCode         2  0 1     
+
+                                             
+---------------------------------------------
+Convergence criterion (GCONV=1E-8) satisfied.
+
+The LOGISTIC Procedure
+Response Variable: Default
+
+Criterion     Value
+---------  --------
+AIC          87.894
+-2 Log L     79.894
+SC           97.422
+
+                Analysis of Maximum Likelihood Estimates                
+
+Parameter          Estimate  Standard Error  Wald Chi-Square  Pr > ChiSq
+-----------------  --------  --------------  ---------------  ----------
+Intercept           11.4218          3.3310          11.7580      0.0006
+Term                -0.0548          0.0139          15.6320      <.0001
+RealEstate          -7.9259          2.4670          10.3215      0.0013
+DisbursementGross    0.0000          0.0000           4.9133      0.0267
+
+                         Odds Ratio Estimates                          
+
+Effect             Point Estimate  95% Wald CL Lower  95% Wald CL Upper
+-----------------  --------------  -----------------  -----------------
+Term                        0.947              0.921              0.973
+RealEstate                  0.000              0.000              0.045
+DisbursementGross           1.000              1.000              1.000
+
+          Summary of Stepwise Selection          
+
+    Step  Effect    Variable           Pr > ChiSq
+--------  --------  -----------------  ----------
+       1  Entered   Term                   0.0021
+       2  Entered   RealEstate             0.0024
+       3  Entered   DisbursementGross      0.0267
+
+Variables Selected
+
+Variable         
+-----------------
+Term             
+RealEstate       
+DisbursementGross
+
+                                             Full model parameter estimates
+
+
+         VARIABLE  CLASSVAL0        ESTIMATE        STDERR      WALDCHISQ     PROBCHISQ
+-----------------  ---------  --------------  ------------  -------------  ------------
+Intercept                      23.7652826791  9.0927465162   6.8311811242  0.0089580009
+Term                           -0.0637669465  0.0159579515  15.9675013007  0.0000644393
+NoEmp                          -0.0241759065  0.0430324277   0.3156267759   0.574247722
+CreateJob                      -0.3907084496  0.2075146018   3.5449350647   0.059727505
+RetainedJob                     0.0418783356  0.0572225319   0.5356050786  0.4642598534
+FranchiseCode      0          -11.9020567427  7.4277953432   2.5675811253  0.1090744003
+UrbanRural         0            0.5217009726  2.5268503857   0.0426269477  0.8364293066
+UrbanRural         1            1.0668130815  1.9652804796   0.2946643419  0.5872468982
+RevLineCr          0            0.8991950447   0.829914708    1.173926448  0.2785959276
+RealEstate         0          -10.5464791479  3.0061464731  12.3082050133  0.0004509715
+Recession          0             0.790912632  1.1386344636   0.4824900642  0.4872965796
+DisbursementGross               0.0000027832  0.0000021682   1.6477509409  0.1992653167
+Portion                         1.8927017404  2.8052534747   0.4552187533   0.499867014
+
+                                           Stepwise model parameter estimates
+
+
+         VARIABLE  CLASSVAL0       ESTIMATE        STDERR      WALDCHISQ     PROBCHISQ
+-----------------  ---------  -------------  ------------  -------------  ------------
+Intercept                     11.4218284784   3.330957631  11.7579890379  0.0006058264
+Term                          -0.0547673644  0.0138520706   15.631990829  0.0000769418
+RealEstate         0          -7.9258966362  2.4670471527   10.321478401  0.0013149092
+DisbursementGross              0.0000046794  0.0000021111   4.9132622951  0.0266512594
+

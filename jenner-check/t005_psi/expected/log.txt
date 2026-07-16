@@ -1,0 +1,73 @@
+NOTE: Jenner v1.5.30 (build v1.5.30+unknown.20260715T062217Z.x86_64-unknown-linux-gnu)
+
+NOTE: Option OBS changed to 100.
+NOTE: DATA OOS_Scored
+
+NOTE: Processing inline DATALINES (30 lines)
+
+NOTE: Read 30 rows from DATALINES.
+NOTE: Wrote OOS_Scored (30 rows, 1 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA OOT_Scored
+
+NOTE: Processing inline DATALINES (30 lines)
+
+NOTE: Read 30 rows from DATALINES.
+NOTE: Wrote OOT_Scored (30 rows, 1 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA OOS_Scored_binned
+
+
+NOTE: Read 30 rows from OOS_Scored.
+NOTE: Wrote OOS_Scored_binned (30 rows, 2 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC FREQ
+NOTE: Output dataset OOS_distribution has 10 observations and 3 variables.
+NOTE: PROC FREQ statement used.
+NOTE: DATA OOS_distribution_pct
+
+
+NOTE: Read 10 rows from OOS_distribution.
+NOTE: Wrote OOS_distribution_pct (10 rows, 3 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA OOT_Scored_binned
+
+
+NOTE: Read 30 rows from OOT_Scored.
+NOTE: Wrote OOT_Scored_binned (30 rows, 2 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC FREQ
+NOTE: Output dataset OOT_distribution has 9 observations and 3 variables.
+NOTE: PROC FREQ statement used.
+NOTE: DATA OOT_distribution_pct
+
+
+NOTE: Read 9 rows from OOT_distribution.
+NOTE: Wrote OOT_distribution_pct (9 rows, 3 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC SQL 
+
+NOTE: Table psi_table created.
+NOTE: PROC SQL statement used.
+NOTE: PROC SQL 
+
+NOTE: Macro variable TOTAL_PSI = 0.1346869503
+NOTE: PROC SQL statement used.
+NOTE: PROC PRINT data=psi_table
+
+NOTE: PROC PRINT completed: 10 observations printed, 6 variables
+NOTE: DATA _null_
+
+NOTE: DATA _null_ completed. Output written to FILE PRINT

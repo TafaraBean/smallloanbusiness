@@ -1,0 +1,123 @@
+                                                    Defaults by Area
+
+                                                   The FREQ Procedure
+
+Table of area by default_n
+
+area      |         0 |         1 |      Total
+----------+-----------+-----------+-----------
+Rural     |         3 |         0 |          3
+----------+-----------+-----------+-----------
+Undefined |         4 |         0 |          4
+----------+-----------+-----------+-----------
+Urban     |        10 |        12 |         22
+----------+-----------+-----------+-----------
+Total     |        17 |        12 |         29
+
+                                                  Default Rate by Area
+
+                                                  The MEANS Procedure
+
+                                             Analysis Variable : default_n
+
+        area                Mean          N Obs
+        ---------------------------------------
+        Rural              0.00%              3
+        Undefined          0.00%              4
+        Urban             54.55%             22
+        ---------------------------------------
+
+                                               Counts by Recession Status
+
+                                                   The FREQ Procedure
+
+                                         Cumulative    Cumulative
+recession_n    Frequency    Percent     Frequency      Percent
+--------------------------------------------------------------------
+0                     28     96.55           28        96.55
+1                      1      3.45           29       100.00
+                                            Default Rate by Recession Status
+
+                                                  The MEANS Procedure
+
+                                            Analysis Variable : default_n
+
+                                                             N
+                                            recession_n    Obs         Mean
+                                            -------------------------------
+                                            0               28       39.29%
+                                            1                1      100.00%
+                                            -------------------------------
+
+                                          Defaults Summary by Franchise Status
+
+                                                  The MEANS Procedure
+
+                                             Analysis Variable : default_n
+
+        fr                N Obs           Mean            Sum
+        -----------------------------------------------------
+        0                    29           0.41          12.00
+        -----------------------------------------------------
+
+                                          Defaults Summary by Franchise Status
+
+                                                   The FREQ Procedure
+
+Table of fr by default_n
+
+fr |         0 |         1 |      Total
+---+-----------+-----------+-----------
+0  |        17 |        12 |         29
+   |     58.62 |     41.38 |     100.00
+   |     58.62 |     41.38 |     100.00
+   |    100.00 |    100.00 |     100.00
+---+-----------+-----------+-----------
+Total |        17 |        12 |         29
+
+Statistics for Table of fr by default_n
+
+Statistic                                DF  Value         Prob
+--------------------------------------------------------------
+Chi-Square                                0 0.0000       1.0000
+Likelihood Ratio Chi-Square               0 0.0000       1.0000
+
+Cramer's V                           0.0000
+Contingency Coefficient              0.0000
+
+Exact Statistics
+
+Pearson Chi-Square (Exact)                     1.0000
+
+                                      Average Disbursement Gross by Default Status
+
+                                                  The MEANS Procedure
+
+                                                Analysis Variable : disb
+
+        default_n           Mean          N Obs
+        ---------------------------------------
+        0               $286,948             17
+        1                $60,797             12
+        ---------------------------------------
+
+                                                 RevLineCr x RealEstate
+
+                                                   The FREQ Procedure
+
+Table of rev_n by re_n
+
+rev_n |         0 |         1 |      Total
+------+-----------+-----------+-----------
+0     |         9 |         6 |         15
+      |     31.03 |     20.69 |      51.72
+      |     60.00 |     40.00 |     100.00
+      |     39.13 |    100.00 |      51.72
+------+-----------+-----------+-----------
+1     |        14 |         0 |         14
+      |     48.28 |      0.00 |      48.28
+      |    100.00 |      0.00 |     100.00
+      |     60.87 |      0.00 |      48.28
+------+-----------+-----------+-----------
+Total |        23 |         6 |         29
+

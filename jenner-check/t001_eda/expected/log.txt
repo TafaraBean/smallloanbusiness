@@ -1,0 +1,55 @@
+NOTE: Jenner v1.5.30 (build v1.5.30+unknown.20260715T062217Z.x86_64-unknown-linux-gnu)
+
+NOTE: Option OBS changed to 100.
+NOTE: DATA raw_loans
+
+NOTE: Processing inline DATALINES (29 lines)
+
+NOTE: Read 29 rows from DATALINES.
+NOTE: Wrote raw_loans (29 rows, 19 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA loans
+
+
+NOTE: Read 29 rows from raw_loans.
+NOTE: Wrote loans (29 rows, 31 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: Option TITLE changed to Defaults by Area.
+NOTE: PROC FREQ
+NOTE: ODS plot written: freq_mosaic_area_default_n.spec.json
+NOTE: PROC FREQ statement used.
+NOTE: Option TITLE changed to Default Rate by Area.
+NOTE: PROC MEANS
+NOTE: PROC MEANS statement used.
+NOTE: Option TITLE changed to Counts by Recession Status.
+NOTE: PROC FREQ
+NOTE: ODS plot written: freq_recession_n.spec.json
+NOTE: PROC FREQ statement used.
+NOTE: Option TITLE changed to Default Rate by Recession Status.
+NOTE: PROC MEANS
+NOTE: PROC MEANS statement used.
+NOTE: DATA fr_rate
+
+
+NOTE: Read 29 rows from loans.
+NOTE: Wrote fr_rate (29 rows, 4 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: Option TITLE changed to Defaults Summary by Franchise Status.
+NOTE: PROC MEANS
+NOTE: PROC MEANS statement used.
+NOTE: PROC FREQ
+NOTE: ODS plot written: freq_mosaic_fr_default_n.spec.json
+NOTE: PROC FREQ statement used.
+NOTE: Option TITLE changed to Average Disbursement Gross by Default Status.
+NOTE: PROC MEANS
+NOTE: PROC MEANS statement used.
+NOTE: Option TITLE changed to RevLineCr x RealEstate.
+NOTE: PROC FREQ
+NOTE: ODS plot written: freq_mosaic_rev_n_re_n.spec.json
+NOTE: PROC FREQ statement used.

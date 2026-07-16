@@ -1,0 +1,14 @@
+{
+  "_captured_at": "2026-07-16T07:38:00Z",
+  "_captured_run_id": "r_ab19fd9c2f2b438ba681237ea5a9788e",
+  "status": "ok",
+  "exit_code": 0,
+  "log_contains": [
+    "NOTE: Wrote raw_loans (29 rows, 19 columns).",
+    "NOTE: Wrote loans_stage (29 rows, 13 columns).",
+    "NOTE: Wrote dev (12 rows, 13 columns).",
+    "NOTE: Wrote hold (17 rows, 13 columns)."
+  ],
+  "log_does_not_contain": ["ERROR:", "[JENNER-ERROR"],
+  "diagnostics": {"parse_warnings": [], "runtime_warnings": []}
+}
